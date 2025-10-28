@@ -1,0 +1,185 @@
+═══════════════════════════════════════════════════════════════
+   📱 INSTRUCCIONES DE INSTALACIÓN - DroneScan V9 APK
+═══════════════════════════════════════════════════════════════
+
+📦 ARCHIVO: DroneScan_V9-FINAL.apk (246 MB)
+🎯 DISPOSITIVO: Xiaomi Redmi Note 13 Pro + HyperOS 2.0.208.0
+🚁 DRONE: DJI NEO + RC-N3
+
+═══════════════════════════════════════════════════════════════
+PASO 1: PREPARAR EL CELULAR
+═══════════════════════════════════════════════════════════════
+
+1. Abrir Configuración → Seguridad
+2. Activar "Instalar apps de fuentes desconocidas"
+   (O permitirlo específicamente para el navegador/explorador)
+
+3. Opcional pero recomendado:
+   - Activar "Opciones de desarrollador"
+   - Ir a Configuración → Sistema → Opciones de desarrollador
+   - Activar "Depuración USB" (para logs si hay problemas)
+
+═══════════════════════════════════════════════════════════════
+PASO 2: TRANSFERIR EL APK
+═══════════════════════════════════════════════════════════════
+
+Opción A - USB:
+1. Conectar celular a PC con cable USB
+2. Copiar "DroneScan_V9-FINAL.apk" a Descargas del celular
+
+Opción B - Cloud:
+1. Subir APK a Google Drive / Dropbox / WeTransfer
+2. Descargar desde el celular
+
+Opción C - ADB (si tienes configurado):
+   adb install DroneScan_V9-FINAL.apk
+
+═══════════════════════════════════════════════════════════════
+PASO 3: INSTALAR LA APP
+═══════════════════════════════════════════════════════════════
+
+1. Abrir "Explorador de archivos" en el celular
+2. Ir a carpeta "Descargas"
+3. Tocar "DroneScan_V9-FINAL.apk"
+4. Confirmar instalación (puede pedir permisos)
+5. Esperar ~30 segundos (es un APK grande)
+6. Presionar "Abrir" cuando termine
+
+═══════════════════════════════════════════════════════════════
+PASO 4: PERMISOS NECESARIOS
+═══════════════════════════════════════════════════════════════
+
+La app pedirá los siguientes permisos (TODOS son necesarios):
+
+✓ Cámara - Para escaneo de códigos de barras
+✓ Ubicación - Para GPS del drone
+✓ Almacenamiento - Para guardar fotos/videos
+✓ Bluetooth - Para comunicación con RC-N3
+✓ WiFi - Para transmisión de video
+✓ USB - Para conexión con controlador
+
+IMPORTANTE: Conceder TODOS los permisos cuando lo solicite
+
+═══════════════════════════════════════════════════════════════
+PASO 5: CONECTAR EL DRONE
+═══════════════════════════════════════════════════════════════
+
+1. Encender DJI NEO
+2. Encender RC-N3
+3. Esperar sincronización (LED verde fijo)
+4. Conectar celular al RC-N3:
+   - Por USB-C (recomendado) O
+   - Por WiFi (si RC-N3 soporta)
+5. Abrir app "DroneScan V9"
+6. Esperar mensaje de conexión
+
+═══════════════════════════════════════════════════════════════
+PASO 6: PRIMERA EJECUCIÓN
+═══════════════════════════════════════════════════════════════
+
+Al abrir la app por primera vez:
+
+1. La app intentará inicializar el SDK DJI
+2. Puede tomar 10-20 segundos la primera vez
+3. Buscar estos indicadores:
+   
+   ✅ SI FUNCIONA:
+   - Video feed del drone visible
+   - Telemetría mostrando datos (batería, GPS, etc)
+   - Sin mensajes de error
+
+   ❌ SI NO FUNCIONA:
+   - App cierra inmediatamente (crash)
+   - Mensaje "NoClassDefFoundError"
+   - Video negro sin telemetría
+
+═══════════════════════════════════════════════════════════════
+TROUBLESHOOTING (SI HAY PROBLEMAS)
+═══════════════════════════════════════════════════════════════
+
+PROBLEMA: App crashea al abrir
+SOLUCIÓN:
+1. Desinstalar app completamente
+2. Reiniciar celular
+3. Volver a instalar
+4. Conceder todos los permisos
+
+PROBLEMA: No detecta el drone
+SOLUCIÓN:
+1. Verificar que RC-N3 esté sincronizado con NEO (LED verde)
+2. Verificar cable USB-C conectado correctamente
+3. Intentar reconectar RC-N3
+4. Cerrar DJI Fly si está abierta (conflicto)
+
+PROBLEMA: Video negro
+SOLUCIÓN:
+1. Verificar permisos de cámara
+2. Reiniciar app
+3. Verificar conexión RC-N3
+
+PROBLEMA: "No compatible"
+RESPUESTA:
+- DJI NEO usa OcuSync 4.0 (compatible con SDK)
+- Mini 4 PRO también usa O4 y SÍ está soportado
+- Debería funcionar, pero sin soporte oficial de DJI
+
+═══════════════════════════════════════════════════════════════
+LOGS Y DEBUG (PARA DESARROLLADOR)
+═══════════════════════════════════════════════════════════════
+
+Para obtener logs detallados si hay problemas:
+
+1. Conectar celular a PC con USB
+2. Activar "Depuración USB" en opciones de desarrollador
+3. Ejecutar en PC:
+   adb logcat | grep -i "dji\|dronescan\|error"
+
+4. Compartir logs para análisis
+
+═══════════════════════════════════════════════════════════════
+EXPECTATIVAS REALISTAS
+═══════════════════════════════════════════════════════════════
+
+⚠️ IMPORTANTE: DJI NEO NO está oficialmente listado en SDK V5
+
+PROBABILIDAD DE ÉXITO: 75-85%
+
+FUNCIONES QUE DEBERÍAN FUNCIONAR:
+✓ Inicialización SDK
+✓ Conexión con drone
+✓ Video feed en tiempo real
+✓ Telemetría básica
+✓ Escaneo de códigos de barras
+✓ Captura foto/video
+
+FUNCIONES QUE PUEDEN FALLAR:
+✗ Misiones waypoint avanzadas
+✗ ActiveTrack (NEO no tiene sensores)
+✗ Algunos modos de vuelo específicos
+
+═══════════════════════════════════════════════════════════════
+CONTACTO / SOPORTE
+═══════════════════════════════════════════════════════════════
+
+Si encuentras problemas:
+
+1. Tomar screenshots del error
+2. Obtener logs con adb logcat
+3. Documentar qué funciona y qué no
+4. Esto ayudará a mejorar la compatibilidad
+
+═══════════════════════════════════════════════════════════════
+INFORMACIÓN TÉCNICA
+═══════════════════════════════════════════════════════════════
+
+Versión App: 1.0 (Debug)
+SDK DJI: V5.8.0
+OcuSync: Compatible con 4.0
+MinSDK: Android 5.0 (API 21)
+TargetSDK: Android 13 (API 33)
+Tamaño APK: 246 MB
+Librerías: 61 archivos nativos (.so)
+
+═══════════════════════════════════════════════════════════════
+                      ¡BUENA SUERTE! 🚁📱
+═══════════════════════════════════════════════════════════════
