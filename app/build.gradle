@@ -92,10 +92,14 @@ dependencies {
     implementation 'androidx.activity:activity-ktx:1.8.2'
     implementation 'androidx.fragment:fragment-ktx:1.6.2'
     
-    // DJI Mobile SDK V5
+    // DJI Mobile SDK V5 - Configuración OFICIAL según README.md
+    // https://github.com/dji-sdk/Mobile-SDK-Android-V5
+    // aircraft: Paquete principal con todas las clases + librerías .so
+    // aircraft-provided: Interfaces solo para compilación (evita duplicados)
+    // networkImp: Funcionalidad de red, solo runtime
     implementation 'com.dji:dji-sdk-v5-aircraft:5.8.0'
     compileOnly 'com.dji:dji-sdk-v5-aircraft-provided:5.8.0'
-    implementation 'com.dji:dji-sdk-v5-networkImp:5.8.0'
+    runtimeOnly 'com.dji:dji-sdk-v5-networkImp:5.8.0'
     
     // CameraX for video feed (optional, mainly using DJI's own)
     implementation 'androidx.camera:camera-core:1.3.1'
