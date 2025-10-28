@@ -94,16 +94,13 @@ class VideoStreamManager(
         )
         
         // Note: setYuvDataListener is not available in this SDK version
-        // Alternative: Use frame listener through stream manager
+        // Alternative: Use frame listener through video decoder
         
         videoDecoder?.onResume()
         LogUtils.i(TAG, "Video decoder started")
 
-        // Listen for YUV frames
-        cameraStreamManager.addYuvDataListener(
-            ComponentIndexType.LEFT_OR_MAIN,
-            VideoChannelType.PRIMARY_STREAM_CHANNEL
-        ) { data, width, height ->
+        // Listen for YUV frames through the video decoder
+        videoDecoder?.addYuvDataListener { mediaFormat, data, width, height ->
             handleYuvFrame(data, width, height)
         }
     }
