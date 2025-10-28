@@ -57,7 +57,7 @@
 
 ### Para Desarrolladores
 
-#### Setup Inicial
+#### Configuración Inicial
 1. [CONFIGURACION_API_DJI.md](CONFIGURACION_API_DJI.md) - Obtener y configurar App Key
 2. [INSTRUCCIONES_COMPILACION.md](INSTRUCCIONES_COMPILACION.md) - Compilar el proyecto
 3. [README.md](README.md) - Estructura del proyecto
@@ -65,7 +65,7 @@
 #### Debugging
 1. [NOCLASSDEFFOUNDERROR_FIX.md](NOCLASSDEFFOUNDERROR_FIX.md) - Solución de crashes
 2. [DJI_NEO_COMPATIBILITY.md](DJI_NEO_COMPATIBILITY.md) - Limitaciones del drone
-3. Logs: `adb logcat -s DroneScan:* DJISDKHelper:*`
+3. [README.md](README.md) - Ver sección Troubleshooting para comandos de logs
 
 #### Testing
 1. [INSTRUCCIONES_COMPILACION.md](INSTRUCCIONES_COMPILACION.md) - Sección "Testing Post-Instalación"
