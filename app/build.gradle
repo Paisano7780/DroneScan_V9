@@ -70,6 +70,9 @@ android {
         pickFirst 'lib/*/libDJIFlySafeCore-CSDK.so'
         pickFirst 'lib/*/libdjifs_jni-CSDK.so'
         exclude 'META-INF/rxjava.properties'
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 }
 
@@ -135,11 +138,14 @@ android.applicationVariants.all { variant ->
         variant.outputs.all { output ->
             def apkFile = output.outputFile
             if (apkFile != null && apkFile.exists()) {
-                def rootDir = project.rootProject.projectDir
-                def destFile = new File(rootDir, "DroneScan_V9-${variant.buildType.name}.apk")
-                println "Copiando APK a: ${destFile.absolutePath}"
-                destFile.bytes = apkFile.bytes
-                println "✅ APK copiado exitosamente: ${destFile.name} (${destFile.length() / 1024 / 1024} MB)"
+                copy {
+                    from apkFile.parent
+                    include apkFile.name
+                    into project.rootDir
+                    rename { String fileName ->
+                        "DroneScan_V9-${variant.buildType.name}.apk"
+                    }
+                }
             }
         }
     }
