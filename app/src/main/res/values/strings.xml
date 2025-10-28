@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DroneScan</string>
+    <string name="sdk_initializing">SDK: Initializing...</string>
+    <string name="sdk_registered">SDK: Registered ✓</string>
+    <string name="sdk_error">SDK: Error</string>
+    <string name="drone_connected">Drone: Connected ✓</string>
+    <string name="drone_disconnected">Drone: Disconnected</string>
+    <string name="gps_no_signal">GPS: No signal</string>
+    <string name="scanning">Scanning...</string>
+    <string name="code_detected">CODE DETECTED - Press Shutter to Capture</string>
+    <string name="no_active_session">No active session</string>
+    <string name="codes_scanned">Codes Scanned: %d</string>
+    <string name="start_session">START\nSESSION</string>
+    <string name="start_scan">START\nSCAN</string>
+    <string name="stop_scan">STOP\nSCAN</string>
+    <string name="export">EXPORT</string>
+    <string name="end_session">END\nSESSION</string>
+    <string name="session_info_title">SESSION INFO</string>
+    <string name="instructions_title">INSTRUCTIONS</string>
+    <string name="instructions_text">1. Start a scan session\n2. Start scanning\n3. Position drone near barcode/QR\n4. Press SHUTTER on RC when code detected\n5. Code will be saved with GPS location</string>
+    <string name="permissions_required_title">Permissions Required</string>
+    <string name="permissions_required_message">This app requires camera, location, and bluetooth permissions to function properly.</string>
+    <string name="grant">Grant</string>
+    <string name="exit">Exit</string>
+    <string name="cancel">Cancel</string>
+    <string name="end_session_title">End Session</string>
+    <string name="end_session_message">Do you want to end the current scanning session? All data will be saved.</string>
+    <string name="code_captured">Code captured: %s</string>
+    <string name="exported_to">Exported to:\n%s\n%s</string>
+    <string name="session_saved">Session saved to: %s</string>
+    <string name="no_code_detected">No code detected. Position drone closer to barcode.</string>
+</resources>

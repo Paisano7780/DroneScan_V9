@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".ui.MainActivity">
+
+    <!-- Video Feed Surface -->
+    <SurfaceView
+        android:id="@+id/surfaceView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/controlPanel"
+        app:layout_constraintEnd_toStartOf="@id/infoPanel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Detection Indicator Overlay -->
+    <View
+        android:id="@+id/detectionIndicator"
+        android:layout_width="0dp"
+        android:layout_height="8dp"
+        android:background="@color/detection_active"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/surfaceView"
+        app:layout_constraintStart_toStartOf="@id/surfaceView"
+        app:layout_constraintTop_toTopOf="@id/surfaceView"
+        tools:visibility="visible" />
+
+    <!-- Detected Code Display -->
+    <TextView
+        android:id="@+id/tvDetectedCode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="#CC000000"
+        android:fontFamily="monospace"
+        android:padding="12dp"
+        android:text="QR_CODE: https://example.com"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/surfaceView"
+        app:layout_constraintTop_toBottomOf="@id/detectionIndicator"
+        tools:visibility="visible" />
+
+    <!-- Status Text -->
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="#CC000000"
+        android:padding="8dp"
+        android:text="Ready"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/surfaceView"
+        app:layout_constraintStart_toStartOf="@id/surfaceView" />
+
+    <!-- Right Info Panel -->
+    <LinearLayout
+        android:id="@+id/infoPanel"
+        android:layout_width="320dp"
+        android:layout_height="0dp"
+        android:background="@color/panel_background"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_constraintBottom_toTopOf="@id/controlPanel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DRONESCAN"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginVertical="8dp"
+            android:background="@color/divider" />
+
+        <!-- SDK Status -->
+        <TextView
+            android:id="@+id/tvSdkStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="SDK: Initializing..."
+            android:textColor="@color/status_warning"
+            android:textSize="14sp" />
+
+        <!-- Drone Status -->
+        <TextView
+            android:id="@+id/tvDroneStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Drone: Disconnected"
+            android:textColor="@color/status_warning"
+            android:textSize="14sp" />
+
+        <!-- GPS Location -->
+        <TextView
+            android:id="@+id/tvLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="GPS: No signal"
+            android:textColor="@color/status_warning"
+            android:textSize="14sp" />
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:visibility="gone" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginVertical="12dp"
+            android:background="@color/divider" />
+
+        <!-- Session Info -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SESSION INFO"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvSessionInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="monospace"
+            android:text="No active session"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+
+        <!-- Codes Count -->
+        <TextView
+            android:id="@+id/tvCodesCount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Codes Scanned: 0"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginVertical="12dp"
+            android:background="@color/divider" />
+
+        <!-- Instructions -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="INSTRUCTIONS"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:lineSpacingExtra="4dp"
+            android:text="1. Start a scan session\n2. Start scanning\n3. Position drone near barcode/QR\n4. Press SHUTTER on RC when code detected\n5. Code will be saved with GPS location"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
+
+    </LinearLayout>
+
+    <!-- Bottom Control Panel -->
+    <LinearLayout
+        android:id="@+id/controlPanel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/panel_background"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/btnStartSession"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="START\nSESSION"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnStartScan"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="START\nSCAN"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnStopScan"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="STOP\nSCAN"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnExport"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="EXPORT"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnEndSession"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="END\nSESSION"
+            android:textColor="@color/status_error"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
