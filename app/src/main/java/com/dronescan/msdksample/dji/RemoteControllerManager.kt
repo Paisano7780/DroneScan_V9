@@ -2,10 +2,13 @@ package com.dronescan.msdksample.dji
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import dji.sdk.keyvalue.key.RemoteControllerKey
-import dji.v5.et.create
 import dji.v5.manager.KeyManager
 import dji.v5.common.callback.CommonCallbacks
+import dji.sdk.keyvalue.key.KeyCameraShutterCommand
+import dji.sdk.keyvalue.key.KeyCameraRecording
+import dji.sdk.keyvalue.value.camera.CameraShutterCommand
+import dji.sdk.keyvalue.value.camera.CameraRecordingState
+import dji.v5.et.create
 import com.dronescan.msdksample.utils.LogUtils
 
 /**
@@ -41,17 +44,15 @@ class RemoteControllerManager {
         
         // Monitor shutter button (picture button)
         KeyManager.getInstance().listen(
-            RemoteControllerKey.KeyShutterButtonDown.create(),
+            KeyCameraShutterCommand.create(),
             this,
-            object : CommonCallbacks.KeyListener<Boolean> {
-                override fun onValueChange(oldValue: Boolean?, newValue: Boolean?) {
-                    val pressed = newValue ?: false
-                    LogUtils.d(TAG, "Shutter button: $pressed")
-                    _shutterButtonPressed.postValue(pressed)
-                    
-                    // Trigger on button press (not release)
-                    if (pressed) {
+            object : CommonCallbacks.KeyListener<CameraShutterCommand> {
+                override fun onValueChange(oldValue: CameraShutterCommand?, newValue: CameraShutterCommand?) {
+                    if (newValue == CameraShutterCommand.START_TAKE_PHOTO) {
                         LogUtils.i(TAG, "Shutter button pressed - triggering capture")
+                        _shutterButtonPressed.postValue(true)
+                    } else {
+                        _shutterButtonPressed.postValue(false)
                     }
                 }
             }
@@ -59,13 +60,13 @@ class RemoteControllerManager {
         
         // Monitor record button (optional)
         KeyManager.getInstance().listen(
-            RemoteControllerKey.KeyRecordButtonDown.create(),
+            KeyCameraRecording.create(),
             this,
-            object : CommonCallbacks.KeyListener<Boolean> {
-                override fun onValueChange(oldValue: Boolean?, newValue: Boolean?) {
-                    val pressed = newValue ?: false
-                    LogUtils.d(TAG, "Record button: $pressed")
-                    _recordButtonPressed.postValue(pressed)
+            object : CommonCallbacks.KeyListener<CameraRecordingState> {
+                override fun onValueChange(oldValue: CameraRecordingState?, newValue: CameraRecordingState?) {
+                    val isRecording = newValue == CameraRecordingState.STARTING || newValue == CameraRecordingState.RECORDING
+                    _recordButtonPressed.postValue(isRecording)
+                    LogUtils.d(TAG, "Record button state: $newValue")
                 }
             }
         )

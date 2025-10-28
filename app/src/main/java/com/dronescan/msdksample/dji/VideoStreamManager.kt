@@ -98,9 +98,17 @@ class VideoStreamManager(
         
         videoDecoder?.onResume()
         LogUtils.i(TAG, "Video decoder started")
+
+        // Listen for YUV frames
+        cameraStreamManager.addYuvDataListener(
+            ComponentIndexType.LEFT_OR_MAIN,
+            VideoChannelType.PRIMARY_STREAM_CHANNEL
+        ) { data, width, height ->
+            handleYuvFrame(data, width, height)
+        }
     }
 
-    private fun handleYuvFrame(data: ByteArray, width: Int, height: Int, format: Int) {
+    private fun handleYuvFrame(data: ByteArray, width: Int, height: Int) {
         try {
             // Notify YUV callback
             yuvFrameCallback?.invoke(data, width, height)
