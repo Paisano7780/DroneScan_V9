@@ -111,6 +111,19 @@ QR Code, EAN-13, EAN-8, UPC-A, UPC-E, Code-39, Code-93, Code-128, ITF, Codabar, 
 
 ## Troubleshooting
 
+### ⚠️ NoClassDefFoundError (App Crashes on Launch)
+**FIXED** - See [NOCLASSDEFFOUNDERROR_FIX.md](NOCLASSDEFFOUNDERROR_FIX.md) for complete solution.
+- Ensure `compileOnly` is used for `dji-sdk-v5-aircraft-provided` dependency
+- ProGuard rules have been updated
+- Rebuild with: `./gradlew clean assembleDebug`
+
+### ⚠️ DJI Neo Compatibility
+See [DJI_NEO_COMPATIBILITY.md](DJI_NEO_COMPATIBILITY.md) for detailed compatibility information.
+- DJI Neo has **limited SDK V5 support**
+- Video streaming and telemetry should work
+- Advanced flight control may not be available
+- Use hybrid approach: RC for flight, app for scanning
+
 ### SDK Registration Failed
 - Verify DJI App Key in AndroidManifest.xml
 - Check internet connection
@@ -128,6 +141,13 @@ QR Code, EAN-13, EAN-8, UPC-A, UPC-E, Code-39, Code-93, Code-128, ITF, Codabar, 
 - Hold drone stable
 - Check barcode quality
 
+## Documentation
+
+- 📄 [Quick Start Guide](QUICK_START.md) - Fast setup and usage
+- 📄 [DJI API Configuration](CONFIGURACION_API_DJI.md) - DJI Developer setup
+- 📄 [DJI Neo Compatibility](DJI_NEO_COMPATIBILITY.md) - DJI Neo specific information
+- 📄 [NoClassDefFoundError Fix](NOCLASSDEFFOUNDERROR_FIX.md) - Crash troubleshooting
+
 ## License
 
 This project is provided as-is for educational and commercial use.
@@ -136,3 +156,4 @@ This project is provided as-is for educational and commercial use.
 
 - DJI SDK: https://developer.dji.com/doc/mobile-sdk-tutorial/en/
 - ML Kit: https://developers.google.com/ml-kit/vision/barcode-scanning
+- DJI Forum: https://forum.dji.com/forum-139-1.html
