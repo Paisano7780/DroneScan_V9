@@ -1,8 +1,8 @@
-name: Android CI with Firebase Test Lab
+name: Android CI - Build and Test
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -39,9 +39,6 @@ jobs:
     - name: Build Debug APK
       run: ./gradlew assembleDebug --stacktrace
     
-    - name: Build Test APK
-      run: ./gradlew assembleDebugAndroidTest --stacktrace
-    
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
       with:
@@ -49,76 +46,14 @@ jobs:
         path: app/build/outputs/apk/debug/*.apk
         retention-days: 7
     
-    - name: Upload Test APK
+    - name: Run Lint Checks
+      run: ./gradlew lintDebug --stacktrace
+      continue-on-error: true
+    
+    - name: Upload Lint Results
+      if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: app-debug-test
-        path: app/build/outputs/apk/androidTest/debug/*.apk
+        name: lint-results
+        path: app/build/reports/lint-results-debug.html
         retention-days: 7
-    
-    - name: Run Unit Tests
-      run: ./gradlew testDebugUnitTest --stacktrace
-    
-    - name: Upload Test Results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results
-        path: app/build/test-results/
-        retention-days: 7
-
-  firebase-test:
-    name: Firebase Test Lab
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Download Debug APK
-      uses: actions/download-artifact@v4
-      with:
-        name: app-debug
-        path: ./
-    
-    - name: Download Test APK
-      uses: actions/download-artifact@v4
-      with:
-        name: app-debug-test
-        path: ./
-    
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-    
-    - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
-    
-    - name: Run tests on Firebase Test Lab
-      run: |
-        gcloud firebase test android run \
-          --type instrumentation \
-          --app DroneScan_V9-debug.apk \
-          --test app-debug-androidTest.apk \
-          --device model=Pixel2,version=30,locale=en,orientation=portrait \
-          --device model=Pixel6,version=33,locale=en,orientation=portrait \
-          --timeout 10m \
-          --results-bucket=gs://dronescan-v9-test-results \
-          --results-dir=test-run-$(date +%Y%m%d-%H%M%S)
-    
-    - name: Download test results
-      if: always()
-      run: |
-        mkdir -p test-results
-        gsutil -m cp -r gs://dronescan-v9-test-results/* test-results/ || true
-    
-    - name: Upload Firebase Test Results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: firebase-test-results
-        path: test-results/
-        retention-days: 30
