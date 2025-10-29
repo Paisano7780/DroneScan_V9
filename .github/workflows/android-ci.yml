@@ -91,11 +91,12 @@ jobs:
         APK_FILE=$(find ./apk -name "*.apk" -type f | head -1)
         echo "Testing APK: $APK_FILE"
         
-        # Run robo test (doesn't require test APK)
+        # Run robo test on Android 14 (closest to Xiaomi Redmi Note 13 Pro with Android 15/HyperOS)
+        # Using Pixel 8 with Android 14 (API 34)
         gcloud firebase test android run \
           --type robo \
           --app "$APK_FILE" \
-          --device model=Pixel2,version=30,locale=en,orientation=portrait \
+          --device model=shiba,version=34,locale=en,orientation=portrait \
           --timeout 5m \
           --results-bucket=gs://${{ secrets.GCP_PROJECT_ID }}-test-results \
           --results-dir=robo-test-$(date +%Y%m%d-%H%M%S) \
