@@ -57,3 +57,61 @@ jobs:
         name: lint-results
         path: app/build/reports/lint-results-debug.html
         retention-days: 7
+
+  firebase-test:
+    name: Firebase Test Lab
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Download Debug APK
+      uses: actions/download-artifact@v4
+      with:
+        name: app-debug
+        path: ./apk
+    
+    - name: Authenticate to Google Cloud
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+    
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+    
+    - name: Run Robo Test on Firebase Test Lab
+      run: |
+        # Find the APK file
+        APK_FILE=$(find ./apk -name "*.apk" -type f | head -1)
+        echo "Testing APK: $APK_FILE"
+        
+        # Run robo test (doesn't require test APK)
+        gcloud firebase test android run \
+          --type robo \
+          --app "$APK_FILE" \
+          --device model=Pixel2,version=30,locale=en,orientation=portrait \
+          --timeout 5m \
+          --results-bucket=gs://${{ secrets.GCP_PROJECT_ID }}-test-results \
+          --results-dir=robo-test-$(date +%Y%m%d-%H%M%S) \
+          --no-record-video \
+          --no-performance-metrics
+    
+    - name: Download test results
+      if: always()
+      run: |
+        mkdir -p test-results
+        gsutil -m cp -r gs://${{ secrets.GCP_PROJECT_ID }}-test-results/* test-results/ || true
+    
+    - name: Upload Firebase Test Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: firebase-test-results
+        path: test-results/
+        retention-days: 30
