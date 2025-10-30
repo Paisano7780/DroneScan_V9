@@ -136,9 +136,13 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'androidx.test:rules:1.5.0'
     
-    // DJI SDK for instrumented tests
+    // DJI SDK for instrumented tests - must mirror main dependencies
     androidTestImplementation 'com.dji:dji-sdk-v5-aircraft:5.16.0'
+    androidTestRuntimeOnly 'com.dji:dji-sdk-v5-networkImp:5.16.0'
     androidTestCompileOnly 'com.dji:dji-sdk-v5-aircraft-provided:5.16.0'
+    
+    // Ensure multidex for tests
+    androidTestImplementation 'androidx.multidex:multidex:2.0.1'
 }
 
 // Tarea para copiar el APK a la raíz del proyecto

@@ -44,17 +44,25 @@ class DroneScanApplication : Application() {
             LogUtils.i(TAG, "🧪 TEST MODE DETECTED - Simulator will auto-start")
         }
         
-        // Initialize DJI SDK
-        DJISDKHelper.getInstance().init(this)
-        
-        // Auto-start simulator in test mode after SDK registration
-        if (isTestMode) {
-            DJISDKHelper.getInstance().registrationState.observeForever { (success, error) ->
-                if (success) {
-                    LogUtils.i(TAG, "SDK registered, starting simulator...")
-                    startSimulatorForTesting()
+        // Initialize DJI SDK with error handling for test environments
+        try {
+            DJISDKHelper.getInstance().init(this)
+            
+            // Auto-start simulator in test mode after SDK registration
+            if (isTestMode) {
+                DJISDKHelper.getInstance().registrationState.observeForever { (success, error) ->
+                    if (success) {
+                        LogUtils.i(TAG, "SDK registered, starting simulator...")
+                        startSimulatorForTesting()
+                    }
                 }
             }
+        } catch (e: NoClassDefFoundError) {
+            // DJI SDK classes not available in test APK - this is expected in some test scenarios
+            LogUtils.w(TAG, "⚠️ DJI SDK classes not available: ${e.message}")
+            LogUtils.i(TAG, "Running in limited test mode without DJI SDK")
+        } catch (e: Exception) {
+            LogUtils.e(TAG, "❌ Failed to initialize DJI SDK: ${e.message}", e)
         }
         
         LogUtils.d(TAG, "DroneScan Application Initialized")

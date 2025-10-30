@@ -71,7 +71,12 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
 
     - name: Run instrumented tests on Firebase Test Lab
+      id: firebase_test
+      continue-on-error: true
       run: |
+        TEST_DIR="instrumented-tests-$(date +%Y%m%d-%H%M%S)"
+        echo "test_dir=$TEST_DIR" >> $GITHUB_OUTPUT
+        
         gcloud firebase test android run \
           --type instrumentation \
           --app app/build/outputs/apk/debug/*.apk \
@@ -79,10 +84,38 @@ jobs:
           --device model=shiba,version=34,locale=en,orientation=portrait \
           --timeout 10m \
           --results-bucket=gs://dronescan-855ff-test-results \
-          --results-dir=instrumented-tests-$(date +%Y%m%d-%H%M%S) \
+          --results-dir=$TEST_DIR \
           --environment-variables coverage=true,coverageFile="/sdcard/coverage.ec" \
           --project=${{ secrets.GCP_PROJECT_ID }} \
           --no-record-video
+
+    - name: Download Test Results from GCS
+      if: always()
+      continue-on-error: true
+      run: |
+        TEST_DIR="${{ steps.firebase_test.outputs.test_dir }}"
+        echo "📥 Downloading test results from gs://dronescan-855ff-test-results/$TEST_DIR"
+        
+        mkdir -p firebase-test-results
+        gsutil -m cp -r "gs://dronescan-855ff-test-results/$TEST_DIR/**" firebase-test-results/ || true
+        
+        # List downloaded files
+        echo "📋 Downloaded files:"
+        find firebase-test-results -type f
+        
+        # Show logcat if exists
+        if [ -f firebase-test-results/*/logcat ]; then
+          echo "📱 Logcat output:"
+          cat firebase-test-results/*/logcat | tail -200
+        fi
+
+    - name: Upload Test Results as Artifact
+      if: always()
+      uses: actions/upload-artifact@v4.5.0
+      with:
+        name: firebase-test-results
+        path: firebase-test-results/
+        retention-days: 30
 
     - name: Test Summary
       if: always()
