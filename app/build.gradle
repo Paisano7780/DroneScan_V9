@@ -135,6 +135,10 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'androidx.test:rules:1.5.0'
+    
+    // DJI SDK for instrumented tests
+    androidTestImplementation 'com.dji:dji-sdk-v5-aircraft:5.16.0'
+    androidTestCompileOnly 'com.dji:dji-sdk-v5-aircraft-provided:5.16.0'
 }
 
 // Tarea para copiar el APK a la raíz del proyecto
