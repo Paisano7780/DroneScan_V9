@@ -157,14 +157,15 @@ class SimulatorManager private constructor() {
      */
     private fun startListeningToSimulatorState() {
         if (simulatorStatusListener == null) {
-            simulatorStatusListener = SimulatorStatusListener { state ->
+            val listener = SimulatorStatusListener { state ->
                 // Use API names from MSDK v5 sample: positionX/Y/Z and location.latitude/longitude
                 LogUtils.d(TAG, "Simulator State: Lat=${state.location.latitude}, " +
                         "Lon=${state.location.longitude}, Alt=${state.positionZ}, " +
-                        "IsFlying=${state.areMotorsOn}")
+                        "IsFlying=${state.areMotorsOn()}")
                 simulatorState.postValue(state)
             }
-            DJISimulatorManager.getInstance().addSimulatorStateListener(simulatorStatusListener)
+            simulatorStatusListener = listener
+            DJISimulatorManager.getInstance().addSimulatorStateListener(listener)
         }
     }
 
@@ -172,8 +173,9 @@ class SimulatorManager private constructor() {
      * Stop listening to simulator state updates
      */
     private fun stopListeningToSimulatorState() {
-        simulatorStatusListener?.let {
-            DJISimulatorManager.getInstance().removeSimulatorStateListener(it)
+        val listener = simulatorStatusListener
+        if (listener != null) {
+            DJISimulatorManager.getInstance().removeSimulatorStateListener(listener)
             simulatorStatusListener = null
         }
     }
