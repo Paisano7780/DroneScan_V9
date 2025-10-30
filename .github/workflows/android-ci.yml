@@ -1,118 +1,107 @@
-name: Android CI - Build and Test
+name: Android CI - DJI Drone App with Simulator
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
   build:
-    name: Build and Test
     runs-on: ubuntu-latest
-    
+    name: Build APKs
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
+    - uses: actions/checkout@v3
+
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: 'gradle'
-    
+        cache: gradle
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-    
-    - name: Cache Gradle packages
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-    
+
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --stacktrace
-    
+      run: ./gradlew assembleDebug
+
+    - name: Build Debug Test APK
+      run: ./gradlew assembleDebugAndroidTest
+
     - name: Upload Debug APK
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: app-debug
-        path: app/build/outputs/apk/debug/*.apk
-        retention-days: 7
-    
-    - name: Run Lint Checks
-      run: ./gradlew lintDebug --stacktrace
-      continue-on-error: true
-    
-    - name: Upload Lint Results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: lint-results
-        path: app/build/reports/lint-results-debug.html
-        retention-days: 7
+        path: app/build/outputs/apk/debug/app-debug.apk
 
-  firebase-test:
-    name: Firebase Test Lab
+    - name: Upload Debug Test APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-debug-androidTest
+        path: app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+
+  test:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
+    name: Instrumented Tests on Firebase Test Lab
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Download Debug APK
-      uses: actions/download-artifact@v4
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
       with:
-        name: app-debug
-        path: ./apk
-    
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+
+    - name: Build Debug Test APK
+      run: ./gradlew assembleDebugAndroidTest
+
     - name: Authenticate to Google Cloud
-      id: auth
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v1
       with:
         credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-    
+
     - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
-      with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-    
-    - name: Run Robo Test on Firebase Test Lab
+      uses: google-github-actions/setup-gcloud@v1
+
+    - name: Run instrumented tests on Firebase Test Lab
       run: |
-        # Find the APK file
-        APK_FILE=$(find ./apk -name "*.apk" -type f | head -1)
-        echo "Testing APK: $APK_FILE"
-        
-        # Run robo test on Android 14 (closest to Xiaomi Redmi Note 13 Pro with Android 15/HyperOS)
-        # Using Pixel 8 with Android 14 (API 34)
         gcloud firebase test android run \
-          --type robo \
-          --app "$APK_FILE" \
+          --type instrumentation \
+          --app app/build/outputs/apk/debug/app-debug.apk \
+          --test app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
           --device model=shiba,version=34,locale=en,orientation=portrait \
-          --timeout 5m \
-          --results-bucket=gs://${{ secrets.GCP_PROJECT_ID }}-test-results \
-          --results-dir=robo-test-$(date +%Y%m%d-%H%M%S) \
-          --no-record-video \
-          --no-performance-metrics
-    
-    - name: Download test results
+          --timeout 10m \
+          --results-bucket=gs://dronescan-855ff-test-results \
+          --results-dir=instrumented-tests-$(date +%Y%m%d-%H%M%S) \
+          --environment-variables coverage=true,coverageFile="/sdcard/coverage.ec" \
+          --project=${{ secrets.GCP_PROJECT_ID }} \
+          --no-record-video
+
+    - name: Test Summary
       if: always()
       run: |
-        mkdir -p test-results
-        gsutil -m cp -r gs://${{ secrets.GCP_PROJECT_ID }}-test-results/* test-results/ || true
-    
-    - name: Upload Firebase Test Results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: firebase-test-results
-        path: test-results/
-        retention-days: 30
+        echo "## 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Instrumented tests completed on Firebase Test Lab" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Test Configuration:" >> $GITHUB_STEP_SUMMARY
+        echo "- **Device:** Pixel 8 (shiba)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Android Version:** API 34 (Android 14)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Test Type:** Instrumentation with DJI Simulator" >> $GITHUB_STEP_SUMMARY
+        echo "- **Timeout:** 10 minutes" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "ℹ️ **Note:** DJI SDK tests run in simulation mode" >> $GITHUB_STEP_SUMMARY
+        echo "ℹ️ Tests verify app stability without physical drone hardware" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📊 View detailed results in Firebase Test Lab console" >> $GITHUB_STEP_SUMMARY

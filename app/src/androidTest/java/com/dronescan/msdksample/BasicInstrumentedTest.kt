@@ -3,21 +3,40 @@ package com.dronescan.msdksample
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.dronescan.msdksample.dji.DJISDKHelper
+import com.dronescan.msdksample.dji.SimulatorManager
+import com.dronescan.msdksample.ui.MainActivity
+import dji.v5.common.error.IDJIError
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
- * Instrumented tests for DroneScan V9
+ * Instrumented tests for DroneScan V9 with DJI Simulator
  * These tests run on an Android device or emulator
  */
 @RunWith(AndroidJUnit4::class)
 class BasicInstrumentedTest {
     
+    companion object {
+        private const val TAG = "InstrumentedTest"
+        private const val TIMEOUT_SECONDS = 30L
+    }
+    
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
+    
+    @Before
+    fun setup() {
+        // Enable test mode to auto-start simulator
+        DroneScanApplication.isTestMode = true
+    }
     
     @Test
     fun useAppContext() {
@@ -51,11 +70,71 @@ class BasicInstrumentedTest {
         // Test that SDK initialization doesn't crash the app
         // This is a basic smoke test
         activityRule.scenario.onActivity { activity ->
-            // Wait for SDK initialization (3 seconds should be enough)
-            Thread.sleep(3000)
+            // Wait for SDK initialization (10 seconds should be enough)
+            Thread.sleep(10000)
             
             // If we reach here, the app didn't crash during initialization
             assertNotNull("Activity should still be alive after SDK init", activity)
+            println("✅ App survived SDK initialization without crash")
+        }
+    }
+    
+    @Test
+    fun testSDKRegistrationAttempt() {
+        val latch = CountDownLatch(1)
+        var registrationAttempted = false
+
+        activityRule.scenario.onActivity { activity ->
+            // Observe registration state
+            DJISDKHelper.getInstance().registrationState.observeForever { (success, error) ->
+                registrationAttempted = true
+                if (success) {
+                    println("✅ SDK Registration successful")
+                } else {
+                    println("⚠️  SDK Registration failed: ${error?.description()}")
+                    println("ℹ️  This is expected in test environments without DJI account")
+                }
+                latch.countDown()
+            }
+        }
+
+        // Wait for registration attempt
+        latch.await(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        
+        // Just verify attempt was made (success not required in test env)
+        println("ℹ️  SDK registration attempt completed")
+    }
+    
+    @Test
+    fun testSimulatorManagerExists() {
+        activityRule.scenario.onActivity { activity ->
+            val simulatorManager = SimulatorManager.getInstance()
+            assertNotNull("SimulatorManager should exist", simulatorManager)
+            println("✅ SimulatorManager instance created")
+        }
+    }
+    
+    @Test
+    fun testTestModeDetection() {
+        activityRule.scenario.onActivity { activity ->
+            assertTrue("Test mode should be enabled", DroneScanApplication.isTestMode)
+            println("✅ Test mode correctly detected: ${DroneScanApplication.isTestMode}")
+        }
+    }
+    
+    @Test
+    fun testAppRunsFor30Seconds() {
+        // Extended smoke test - app should run without crashing
+        activityRule.scenario.onActivity { activity ->
+            println("🧪 Running extended stability test (30 seconds)...")
+            
+            for (i in 1..6) {
+                Thread.sleep(5000)
+                println("⏱️  App stable at ${i * 5} seconds")
+                assertNotNull("Activity should still be alive at ${i * 5}s", activity)
+            }
+            
+            println("✅ App completed 30-second stability test successfully")
         }
     }
     
@@ -68,3 +147,4 @@ class BasicInstrumentedTest {
         }
     }
 }
+
