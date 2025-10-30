@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        djiHelper.productConnectionState.observe(this) { (connected, productId) ->
+        djiHelper.productConnectionState.observe(this) { (connected, _) ->
             if (connected) {
                 binding.tvDroneStatus.text = "Drone: Connected ✓"
                 binding.tvDroneStatus.setTextColor(getColor(R.color.status_ok))
@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        djiHelper.initializationProgress.observe(this) { (event, progress) ->
+        djiHelper.initializationProgress.observe(this) { (_, progress) ->
             binding.progressBar.visibility = if (progress < 100) View.VISIBLE else View.GONE
             binding.progressBar.progress = progress
         }

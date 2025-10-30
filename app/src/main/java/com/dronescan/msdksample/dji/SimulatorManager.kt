@@ -95,7 +95,7 @@ class SimulatorManager private constructor() {
         latitude: Double,
         longitude: Double,
         satelliteCount: Int,
-        updateFrequency: Int,
+        @Suppress("UNUSED_PARAMETER") updateFrequency: Int, // Not supported by SDK V5 createInstance
         callback: CommonCallbacks.CompletionCallback?
     ) {
         // Note: UpdateFrequency parameter is not supported by createInstance in SDK V5

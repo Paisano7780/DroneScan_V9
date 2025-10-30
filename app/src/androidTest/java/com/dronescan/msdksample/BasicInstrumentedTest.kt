@@ -82,14 +82,12 @@ class BasicInstrumentedTest {
     @Test
     fun testSDKRegistrationAttempt() {
         val latch = CountDownLatch(1)
-        var registrationAttempted = false
 
-        activityRule.scenario.onActivity { activity ->
+        activityRule.scenario.onActivity { _ ->
             println("🔄 Starting SDK registration test...")
             
             // Observe registration state
             DJISDKHelper.getInstance().registrationState.observeForever { (success, error) ->
-                registrationAttempted = true
                 if (success) {
                     println("✅ SDK Registration successful")
                 } else {
@@ -120,7 +118,7 @@ class BasicInstrumentedTest {
         var simulatorStarted = false
         var errorEncountered: IDJIError? = null
 
-        activityRule.scenario.onActivity { activity ->
+        activityRule.scenario.onActivity { _ ->
             // Step 1: Wait for SDK registration
             println("⏳ Step 1: Waiting for SDK registration...")
             DJISDKHelper.getInstance().registrationState.observeForever { (success, error) ->
@@ -144,7 +142,7 @@ class BasicInstrumentedTest {
             println("✅ SDK registration confirmed, proceeding to simulator...")
             
             // Step 2: Attempt to start simulator
-            activityRule.scenario.onActivity { activity ->
+            activityRule.scenario.onActivity { _ ->
                 println("⏳ Step 2: Attempting to start simulator...")
                 
                 val simulatorManager = SimulatorManager.getInstance()
@@ -197,7 +195,7 @@ class BasicInstrumentedTest {
     
     @Test
     fun testSimulatorManagerExists() {
-        activityRule.scenario.onActivity { activity ->
+        activityRule.scenario.onActivity { _ ->
             val simulatorManager = SimulatorManager.getInstance()
             assertNotNull("SimulatorManager should exist", simulatorManager)
             println("✅ SimulatorManager instance created")
@@ -206,7 +204,7 @@ class BasicInstrumentedTest {
     
     @Test
     fun testTestModeDetection() {
-        activityRule.scenario.onActivity { activity ->
+        activityRule.scenario.onActivity { _ ->
             assertTrue("Test mode should be enabled", DroneScanApplication.isTestMode)
             println("✅ Test mode correctly detected: ${DroneScanApplication.isTestMode}")
         }

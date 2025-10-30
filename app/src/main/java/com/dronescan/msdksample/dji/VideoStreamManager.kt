@@ -27,7 +27,11 @@ import java.io.ByteArrayOutputStream
 /**
  * Manages video stream from DJI drone camera
  * Provides decoded video frames for barcode detection
+ * 
+ * Note: Uses deprecated DJI SDK video APIs (VideoDecoder, VideoChannelType, etc.)
+ * These are still the recommended approach in DJI Mobile SDK V5.16.0
  */
+@Suppress("DEPRECATION")
 class VideoStreamManager(
     private val cameraIndex: ComponentIndexType = ComponentIndexType.LEFT_OR_MAIN,
     private val lensType: CameraLensType = CameraLensType.CAMERA_LENS_ZOOM
@@ -100,19 +104,19 @@ class VideoStreamManager(
         LogUtils.i(TAG, "Video decoder started")
 
         // Listen for YUV frames through the video decoder
-        videoDecoder?.addYuvDataListener { mediaFormat, data, width, height ->
-            handleYuvFrame(data, width, height)
+        videoDecoder?.addYuvDataListener { _, data, frameWidth, frameHeight ->
+            handleYuvFrame(data, frameWidth, frameHeight)
         }
     }
 
-    private fun handleYuvFrame(data: ByteArray, width: Int, height: Int) {
+    private fun handleYuvFrame(data: ByteArray, frameWidth: Int, frameHeight: Int) {
         try {
             // Notify YUV callback
-            yuvFrameCallback?.invoke(data, width, height)
+            yuvFrameCallback?.invoke(data, frameWidth, frameHeight)
             
             // Convert to bitmap if bitmap callback is set
             frameCallback?.let { callback ->
-                val bitmap = convertYuvToBitmap(data, width, height)
+                val bitmap = convertYuvToBitmap(data, frameWidth, frameHeight)
                 bitmap?.let { callback(it) }
             }
         } catch (e: Exception) {
@@ -120,11 +124,11 @@ class VideoStreamManager(
         }
     }
 
-    private fun convertYuvToBitmap(yuvData: ByteArray, width: Int, height: Int): Bitmap? {
+    private fun convertYuvToBitmap(yuvData: ByteArray, frameWidth: Int, frameHeight: Int): Bitmap? {
         return try {
-            val yuvImage = YuvImage(yuvData, ImageFormat.NV21, width, height, null)
+            val yuvImage = YuvImage(yuvData, ImageFormat.NV21, frameWidth, frameHeight, null)
             val outputStream = ByteArrayOutputStream()
-            yuvImage.compressToJpeg(Rect(0, 0, width, height), 75, outputStream)
+            yuvImage.compressToJpeg(Rect(0, 0, frameWidth, frameHeight), 75, outputStream)
             val jpegData = outputStream.toByteArray()
             android.graphics.BitmapFactory.decodeByteArray(jpegData, 0, jpegData.size)
         } catch (e: Exception) {

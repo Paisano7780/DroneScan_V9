@@ -147,7 +147,7 @@ dependencies {
 
 // Tarea para copiar el APK a la raíz del proyecto
 android.applicationVariants.all { variant ->
-    variant.assemble.doLast {
+    variant.assembleProvider.get().doLast {
         variant.outputs.all { output ->
             def apkFile = output.outputFile
             if (apkFile != null && apkFile.exists()) {
@@ -163,3 +163,4 @@ android.applicationVariants.all { variant ->
         }
     }
 }
+

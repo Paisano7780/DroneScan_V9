@@ -72,7 +72,7 @@ class ScanDataRepository(private val context: Context) {
         session.close()
         
         val jsonFile = saveSessionToJson(session)
-        val csvFile = saveSessionToCsv(session)
+        saveSessionToCsv(session) // Save CSV but don't need to return it
         
         LogUtils.i(TAG, "Session closed: ${session.sessionId}, ${session.scannedCodes.size} codes")
         currentSession = null
