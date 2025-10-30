@@ -85,6 +85,8 @@ class BasicInstrumentedTest {
         var registrationAttempted = false
 
         activityRule.scenario.onActivity { activity ->
+            println("🔄 Starting SDK registration test...")
+            
             // Observe registration state
             DJISDKHelper.getInstance().registrationState.observeForever { (success, error) ->
                 registrationAttempted = true
@@ -99,10 +101,98 @@ class BasicInstrumentedTest {
         }
 
         // Wait for registration attempt
-        latch.await(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        val completed = latch.await(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        
+        if (!completed) {
+            println("⚠️  SDK registration did not complete within ${TIMEOUT_SECONDS}s")
+        }
         
         // Just verify attempt was made (success not required in test env)
         println("ℹ️  SDK registration attempt completed")
+    }
+    
+    @Test
+    fun testSimulatorStartupSequence() {
+        println("🧪 Testing complete simulator startup sequence...")
+        val registrationLatch = CountDownLatch(1)
+        val simulatorLatch = CountDownLatch(1)
+        var sdkRegistered = false
+        var simulatorStarted = false
+        var errorEncountered: IDJIError? = null
+
+        activityRule.scenario.onActivity { activity ->
+            // Step 1: Wait for SDK registration
+            println("⏳ Step 1: Waiting for SDK registration...")
+            DJISDKHelper.getInstance().registrationState.observeForever { (success, error) ->
+                sdkRegistered = success
+                if (success) {
+                    println("✅ SDK registered successfully")
+                } else {
+                    println("⚠️  SDK registration failed: ${error?.description()}")
+                    errorEncountered = error
+                }
+                registrationLatch.countDown()
+            }
+        }
+
+        // Wait for registration with timeout
+        val registrationCompleted = registrationLatch.await(20, TimeUnit.SECONDS)
+        
+        if (!registrationCompleted) {
+            println("⏱️  SDK registration timed out after 20s")
+        } else if (sdkRegistered) {
+            println("✅ SDK registration confirmed, proceeding to simulator...")
+            
+            // Step 2: Attempt to start simulator
+            activityRule.scenario.onActivity { activity ->
+                println("⏳ Step 2: Attempting to start simulator...")
+                
+                val simulatorManager = SimulatorManager.getInstance()
+                
+                // Observe simulator state
+                simulatorManager.isSimulatorActive.observeForever { isActive ->
+                    simulatorStarted = isActive
+                    if (isActive) {
+                        println("✅ Simulator is now active")
+                        simulatorLatch.countDown()
+                    }
+                }
+                
+                // Try to start simulator
+                simulatorManager.startSimulator(
+                    latitude = 22.5431,
+                    longitude = 114.0579,
+                    satelliteCount = 12,
+                    callback = object : dji.v5.common.callback.CommonCallbacks.CompletionCallback {
+                        override fun onSuccess() {
+                            println("✅ Simulator start command succeeded")
+                        }
+                        
+                        override fun onFailure(error: IDJIError) {
+                            println("⚠️  Simulator start command failed: ${error.description()}")
+                            errorEncountered = error
+                            simulatorLatch.countDown()
+                        }
+                    }
+                )
+            }
+            
+            // Wait for simulator with timeout
+            val simulatorCompleted = simulatorLatch.await(10, TimeUnit.SECONDS)
+            
+            if (!simulatorCompleted) {
+                println("⏱️  Simulator start timed out after 10s")
+            }
+        }
+        
+        // Results summary
+        println("\n📊 Test Results:")
+        println("  - SDK Registered: $sdkRegistered")
+        println("  - Simulator Started: $simulatorStarted")
+        if (errorEncountered != null) {
+            println("  - Last Error: ${errorEncountered?.description()}")
+        }
+        println("ℹ️  Note: Failures are expected in environments without physical DJI product")
     }
     
     @Test
