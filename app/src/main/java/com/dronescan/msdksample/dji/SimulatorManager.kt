@@ -98,13 +98,13 @@ class SimulatorManager private constructor() {
         updateFrequency: Int,
         callback: CommonCallbacks.CompletionCallback?
     ) {
+        // Note: UpdateFrequency is ignored as createInstance only accepts location and satelliteCount
         val settings = InitializationSettings.createInstance(
             LocationCoordinate2D(latitude, longitude),
-            satelliteCount,
-            updateFrequency
+            satelliteCount
         )
 
-        DJISimulatorManager.getInstance().start(settings, object : CommonCallbacks.CompletionCallback {
+        DJISimulatorManager.getInstance().enableSimulator(settings, object : CommonCallbacks.CompletionCallback {
             override fun onSuccess() {
                 LogUtils.i(TAG, "✅ Simulator started successfully")
                 isSimulatorActive.postValue(true)
@@ -128,7 +128,7 @@ class SimulatorManager private constructor() {
     fun stopSimulator(callback: CommonCallbacks.CompletionCallback? = null) {
         LogUtils.i(TAG, "Stopping simulator...")
         
-        DJISimulatorManager.getInstance().stop(object : CommonCallbacks.CompletionCallback {
+        DJISimulatorManager.getInstance().disableSimulator(object : CommonCallbacks.CompletionCallback {
             override fun onSuccess() {
                 LogUtils.i(TAG, "✅ Simulator stopped successfully")
                 isSimulatorActive.postValue(false)
@@ -157,12 +157,13 @@ class SimulatorManager private constructor() {
     private fun startListeningToSimulatorState() {
         if (simulatorStatusListener == null) {
             simulatorStatusListener = SimulatorStatusListener { state ->
+                // Use API names from MSDK v5 sample: positionX/Y/Z and location.latitude/longitude
                 LogUtils.d(TAG, "Simulator State: Lat=${state.location.latitude}, " +
-                        "Lon=${state.location.longitude}, Alt=${state.location.altitude}, " +
-                        "IsFlying=${state.areMotorsOn}")
+                        "Lon=${state.location.longitude}, Alt=${state.positionZ}, " +
+                        "IsFlying=${state.areMotorsOn()}")
                 simulatorState.postValue(state)
             }
-            DJISimulatorManager.getInstance().addSimulatorStatusListener(simulatorStatusListener)
+            DJISimulatorManager.getInstance().addSimulatorStateListener(simulatorStatusListener)
         }
     }
 
@@ -171,7 +172,7 @@ class SimulatorManager private constructor() {
      */
     private fun stopListeningToSimulatorState() {
         simulatorStatusListener?.let {
-            DJISimulatorManager.getInstance().removeSimulatorStatusListener(it)
+            DJISimulatorManager.getInstance().removeSimulatorStateListener(it)
             simulatorStatusListener = null
         }
     }
