@@ -50,7 +50,7 @@ class DroneScanApplication : Application() {
             
             // Auto-start simulator in test mode after SDK registration
             if (isTestMode) {
-                DJISDKHelper.getInstance().registrationState.observeForever { (success, error) ->
+                DJISDKHelper.getInstance().registrationState.observeForever { (success, _) ->
                     if (success) {
                         LogUtils.i(TAG, "SDK registered, starting simulator...")
                         startSimulatorForTesting()

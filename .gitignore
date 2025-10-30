@@ -30,5 +30,9 @@ render.experimental.xml
 # Google Services (e.g. APIs or Firebase)
 google-services.json
 
+# Firebase/GCP Service Account Keys (NEVER commit these!)
+*-firebase-adminsdk-*.json
+dronescan-*.json
+
 # Android Profiling
 *.hprof

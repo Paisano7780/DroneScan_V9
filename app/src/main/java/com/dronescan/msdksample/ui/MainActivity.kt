@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
+import com.dronescan.msdksample.DroneScanApplication
 import com.dronescan.msdksample.R
 import com.dronescan.msdksample.databinding.ActivityMainBinding
 import com.dronescan.msdksample.dji.DJISDKHelper
@@ -38,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityMainBinding
-    private val viewModel: ScanViewModel by viewModels()
+    private var viewModel: ScanViewModel? = null
     private val djiHelper = DJISDKHelper.getInstance()
 
     private val permissionLauncher = registerForActivityResult(
@@ -60,9 +61,32 @@ class MainActivity : AppCompatActivity() {
 
         LogUtils.i(TAG, "MainActivity created")
         
-        setupObservers()
+        // Only initialize ViewModel if DJI SDK is available (not in limited test mode)
+        if (!DroneScanApplication.isTestMode || isDJISDKAvailable()) {
+            try {
+                val vm: ScanViewModel by viewModels()
+                viewModel = vm
+                setupObservers()
+            } catch (e: Exception) {
+                LogUtils.w(TAG, "Failed to initialize ViewModel: ${e.message}")
+                // Continue without ViewModel in test mode
+            }
+        } else {
+            LogUtils.i(TAG, "Running in limited test mode - ViewModel not initialized")
+        }
+        
         setupButtons()
         checkPermissions()
+    }
+    
+    private fun isDJISDKAvailable(): Boolean {
+        return try {
+            // Try to access a DJI SDK class
+            Class.forName("dji.v5.manager.SDKManager")
+            true
+        } catch (e: ClassNotFoundException) {
+            false
+        }
     }
 
     private fun checkPermissions() {
@@ -88,7 +112,7 @@ class MainActivity : AppCompatActivity() {
                 LogUtils.d(TAG, "Surface created")
                 val width = binding.surfaceView.width
                 val height = binding.surfaceView.height
-                viewModel.setVideoStreamCallback(holder.surface, width, height)
+                viewModel?.setVideoStreamCallback(holder.surface, width, height)
             }
 
             override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
@@ -132,7 +156,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupObservers() {
         // Detection state
-        viewModel.isDetecting.observe(this) { detecting ->
+        viewModel?.isDetecting?.observe(this) { detecting ->
             binding.detectionIndicator.visibility = if (detecting) View.VISIBLE else View.GONE
             if (detecting) {
                 binding.detectionIndicator.setBackgroundColor(getColor(R.color.detection_active))
@@ -145,7 +169,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Detected codes
-        viewModel.detectedCodes.observe(this) { codes ->
+        viewModel?.detectedCodes?.observe(this) { codes ->
             if (codes.isNotEmpty()) {
                 val codeInfo = codes.joinToString("\n") { "${it.format}: ${it.value}" }
                 binding.tvDetectedCode.text = codeInfo
@@ -156,7 +180,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Scan state
-        viewModel.scanState.observe(this) { state ->
+        viewModel?.scanState?.observe(this) { state ->
             when (state) {
                 is ScanState.Idle -> {
                     binding.btnStartSession.isEnabled = true
@@ -186,17 +210,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Session info
-        viewModel.sessionInfo.observe(this) { info ->
+        viewModel?.sessionInfo?.observe(this) { info ->
             binding.tvSessionInfo.text = info
         }
 
         // Scanned codes count
-        viewModel.scannedCodes.observe(this) { codes ->
+        viewModel?.scannedCodes?.observe(this) { codes ->
             binding.tvCodesCount.text = "Codes Scanned: ${codes.size}"
         }
 
         // Location
-        viewModel.currentLocation.observe(this) { location ->
+        viewModel?.currentLocation?.observe(this) { location ->
             if (location != null) {
                 binding.tvLocation.text = "GPS: ${String.format("%.6f, %.6f", location.latitude, location.longitude)}"
                 binding.tvLocation.setTextColor(getColor(R.color.status_ok))
@@ -209,15 +233,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupButtons() {
         binding.btnStartSession.setOnClickListener {
-            viewModel.startSession()
+            viewModel?.startSession()
         }
 
         binding.btnStartScan.setOnClickListener {
-            viewModel.startScanning()
+            viewModel?.startScanning()
         }
 
         binding.btnStopScan.setOnClickListener {
-            viewModel.stopScanning()
+            viewModel?.stopScanning()
         }
 
         binding.btnEndSession.setOnClickListener {
@@ -225,9 +249,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnExport.setOnClickListener {
-            val (jsonFile, csvFile) = viewModel.exportSession()
-            if (jsonFile != null && csvFile != null) {
-                Toast.makeText(this, "Exported to:\n${jsonFile.name}\n${csvFile.name}", Toast.LENGTH_LONG).show()
+            viewModel?.let { vm ->
+                val (jsonFile, csvFile) = vm.exportSession()
+                if (jsonFile != null && csvFile != null) {
+                    Toast.makeText(this, "Exported to:\n${jsonFile.name}\n${csvFile.name}", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -237,9 +263,11 @@ class MainActivity : AppCompatActivity() {
             .setTitle("End Session")
             .setMessage("Do you want to end the current scanning session? All data will be saved.")
             .setPositiveButton("End Session") { _, _ ->
-                val file = viewModel.closeSession()
-                if (file != null) {
-                    Toast.makeText(this, "Session saved to: ${file.name}", Toast.LENGTH_LONG).show()
+                viewModel?.let { vm ->
+                    val file = vm.closeSession()
+                    if (file != null) {
+                        Toast.makeText(this, "Session saved to: ${file.name}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
             .setNegativeButton("Cancel", null)
