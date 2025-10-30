@@ -98,7 +98,8 @@ class SimulatorManager private constructor() {
         updateFrequency: Int,
         callback: CommonCallbacks.CompletionCallback?
     ) {
-        // Note: UpdateFrequency is ignored as createInstance only accepts location and satelliteCount
+        // Note: UpdateFrequency parameter is not supported by createInstance in SDK V5
+        // The method only accepts location and satelliteCount
         val settings = InitializationSettings.createInstance(
             LocationCoordinate2D(latitude, longitude),
             satelliteCount
@@ -160,7 +161,7 @@ class SimulatorManager private constructor() {
                 // Use API names from MSDK v5 sample: positionX/Y/Z and location.latitude/longitude
                 LogUtils.d(TAG, "Simulator State: Lat=${state.location.latitude}, " +
                         "Lon=${state.location.longitude}, Alt=${state.positionZ}, " +
-                        "IsFlying=${state.areMotorsOn()}")
+                        "IsFlying=${state.areMotorsOn}")
                 simulatorState.postValue(state)
             }
             DJISimulatorManager.getInstance().addSimulatorStateListener(simulatorStatusListener)
