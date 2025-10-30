@@ -34,13 +34,13 @@ jobs:
       uses: actions/upload-artifact@v4.5.0
       with:
         name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: app/build/outputs/apk/debug/*.apk
 
     - name: Upload Debug Test APK
       uses: actions/upload-artifact@v4.5.0
       with:
         name: app-debug-androidTest
-        path: app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+        path: app/build/outputs/apk/androidTest/debug/*.apk
 
   test:
     needs: build
@@ -74,8 +74,8 @@ jobs:
       run: |
         gcloud firebase test android run \
           --type instrumentation \
-          --app app/build/outputs/apk/debug/app-debug.apk \
-          --test app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+          --app app/build/outputs/apk/debug/*.apk \
+          --test app/build/outputs/apk/androidTest/debug/*.apk \
           --device model=shiba,version=34,locale=en,orientation=portrait \
           --timeout 10m \
           --results-bucket=gs://dronescan-855ff-test-results \
